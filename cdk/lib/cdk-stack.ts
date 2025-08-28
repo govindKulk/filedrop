@@ -22,18 +22,19 @@ export class CdkStack extends cdk.Stack {
       code: Code.fromAsset('lambda')
     })
     
-    // const helloWithCounter = new HitCounter(this, "", {
-    //   downstream: [hello, calculateAreaFn]
-    // })
+    const helloWithCounter = new HitCounter(this, "HitCounter", {
+      downstream: [hello, calculateAreaFn],
+      pathMappings: {
+        "/api/hello": hello,
+        "/api/calculate-area": calculateAreaFn
+      }
+    })
 
-    const lambdaRestApi = new LambdaRestApi(this, 'LambdaRestApi', {
-      handler: hello,
-      proxy: false
+    // Create API Gateway with HitCounter as the handler
+    const api = new LambdaRestApi(this, 'LambdaRestApi', {
+      handler: helloWithCounter.handler,
+      proxy: true  // Use proxy mode to pass all requests to HitCounter
     });
-
-
-
-    lambdaRestApi.root.addResource('api').addResource('calculate-area').addMethod('GET');
 
 
   }

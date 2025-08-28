@@ -19,21 +19,33 @@ exports.handler = async function (event) {
   // call downstream function and capture response
 
   const functionNames = process.env.DOWNSTREAM_FUNCTION_NAMES.split(' ') || [];
+  const pathMappings = JSON.parse(process.env.PATH_MAPPINGS || '{}');
+  
   console.log("functionNames: ", functionNames)
-  console.log("env functionNames: ", process.env.DOWNSTREAM_FUNCTION_NAMES)
+  console.log("pathMappings: ", pathMappings)
+  console.log("current path: ", event.path)
 
-  // const command = new InvokeCommand({
-  //   FunctionName: process.env.DOWNSTREAM_FUNCTION_NAME,
-  //   Payload: JSON.stringify(event),
-  // });
+  // Find the function name for the current path
+  const targetFunctionName = pathMappings[event.path];
+  
+  if (!targetFunctionName) {
+    return {
+      statusCode: 404,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `No handler found for path: ${event.path}` })
+    };
+  }
 
-  // const { Payload } = await lambda.send(command);
-  // const result = Buffer.from(Payload).toString();
+  const command = new InvokeCommand({
+    FunctionName: targetFunctionName,
+    Payload: JSON.stringify(event),
+  });
 
-  // console.log("downstream response:", JSON.stringify(result, undefined, 2));
+  const { Payload } = await lambda.send(command);
+  const result = Buffer.from(Payload).toString();
+
+  console.log("downstream response:", JSON.stringify(result, undefined, 2));
 
   // return response back to upstream caller
-  return JSON.parse({
-    message: "no function calls"
-  });
+  return JSON.parse(result);
 };
