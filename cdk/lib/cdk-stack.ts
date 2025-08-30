@@ -161,6 +161,62 @@ export class CdkStack extends cdk.Stack {
       new apigateway.LambdaIntegration(confirmSignUpFunction)
     );
 
+    // Cognito Authorizer
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'FiledropAuthorizer', {
+      cognitoUserPools: [userPool],
+      identitySource: 'method.request.header.Authorization',
+    });
+
+    // Upload Lambda function
+    const uploadFunction = new lambda.Function(this, 'UploadFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handlers/upload.handler',
+      code: lambda.Code.fromAsset('../backend/dist'),
+      environment: {
+        BUCKET_NAME: filesBucket.bucketName,
+        TABLE_NAME: filesTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    // Grant S3 and DynamoDB permissions
+    filesBucket.grantReadWrite(uploadFunction);
+    filesTable.grantReadWriteData(uploadFunction);
+
+    // Protected files endpoints
+    const filesResource = api.root.addResource('files');
+    filesResource.addResource('upload').addMethod('POST',
+      new apigateway.LambdaIntegration(uploadFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    );
+
+    // upload complete lambda function
+    const uploadCompleteFunction = new lambda.Function(this, 'UploadCompleteFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'handlers/uploadComplete.handler',
+      code: lambda.Code.fromAsset('../backend/dist'),
+      environment: {
+        BUCKET_NAME: filesBucket.bucketName,
+        TABLE_NAME: filesTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    filesBucket.grantRead(uploadCompleteFunction);
+    filesTable.grantReadWriteData(uploadCompleteFunction);
+
+    filesResource.addResource('complete').addMethod('POST',
+      new apigateway.LambdaIntegration(uploadCompleteFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    );
+
+
     // Outputs
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
