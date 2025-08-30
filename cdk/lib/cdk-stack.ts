@@ -35,6 +35,12 @@ export class CdkStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
+    filesTable.addGlobalSecondaryIndex({
+      indexName: 'fileId-index',
+      partitionKey: { name: 'fileId', type: dynamodb.AttributeType.STRING },
+    });
+
+
     // cognito user pool
     const userPool = new cognito.UserPool(this, "FileDropUserPool", {
       userPoolName: "filedrop-users",
@@ -195,7 +201,7 @@ export class CdkStack extends cdk.Stack {
 
     // upload complete lambda function
     const uploadCompleteFunction = new lambda.Function(this, 'UploadCompleteFunction', {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'handlers/uploadComplete.handler',
       code: lambda.Code.fromAsset('../backend/dist'),
       environment: {
@@ -215,6 +221,73 @@ export class CdkStack extends cdk.Stack {
         authorizationType: apigateway.AuthorizationType.COGNITO,
       }
     );
+
+    // --- File Management Functions / Permissions ---
+
+    // List Files function
+    const listFilesFunction = new lambda.Function(this, 'ListFilesFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handlers/listFiles.handler',
+      code: lambda.Code.fromAsset('../backend/dist'),
+      environment: {
+        TABLE_NAME: filesTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    // Download function
+    const downloadFunction = new lambda.Function(this, 'DownloadFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handlers/download.handler',
+      code: lambda.Code.fromAsset('../backend/dist'),
+      environment: {
+        BUCKET_NAME: filesBucket.bucketName,
+        TABLE_NAME: filesTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    // Delete function
+    const deleteFileFunction = new lambda.Function(this, 'DeleteFileFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handlers/deleteFile.handler',
+      code: lambda.Code.fromAsset('../backend/dist'),
+      environment: {
+        BUCKET_NAME: filesBucket.bucketName,
+        TABLE_NAME: filesTable.tableName,
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    // Grant permissions
+    filesTable.grantReadData(listFilesFunction);
+    filesBucket.grantRead(downloadFunction);
+    filesTable.grantReadWriteData(downloadFunction);
+    filesBucket.grantDelete(deleteFileFunction);
+    filesTable.grantReadWriteData(deleteFileFunction);
+
+    // Add endpoints
+    filesResource.addMethod('GET',
+      new apigateway.LambdaIntegration(listFilesFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    );
+
+    const fileResource = filesResource.addResource('{fileId}');
+    fileResource.addResource('download').addMethod('GET',
+      new apigateway.LambdaIntegration(downloadFunction)
+    );
+
+    fileResource.addMethod('DELETE',
+      new apigateway.LambdaIntegration(deleteFileFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    );
+
 
 
     // Outputs
