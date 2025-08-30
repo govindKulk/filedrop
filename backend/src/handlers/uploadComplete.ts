@@ -1,4 +1,3 @@
-// backend/src/handlers/uploadComplete.ts
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient, UpdateItemCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';

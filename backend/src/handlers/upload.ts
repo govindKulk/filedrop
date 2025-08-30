@@ -1,4 +1,3 @@
-// backend/src/handlers/upload.ts
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
@@ -134,7 +133,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     console.log('Upload URL generated successfully:', { fileId, s3Key });
 
-    return createResponse(200, {
+    return createResponse(201, {
       message: 'Upload URL generated successfully',
       uploadUrl,
       fileId,
