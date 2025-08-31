@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { CognitoIdentityProviderClient, SignUpCommand, InitiateAuthCommand, ConfirmSignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { CognitoIdentityProviderClient, SignUpCommand, InitiateAuthCommand, ConfirmSignUpCommand, EmailSendingAccountType } from '@aws-sdk/client-cognito-identity-provider';
+import { EmailService } from '../services/emailService.js';
 
 const cognitoClient = new CognitoIdentityProviderClient({});
 
@@ -20,7 +21,7 @@ interface ConfirmSignUpRequest {
   confirmationCode: string;
 }
 
-const createResponse = (statusCode: number, body: {[key: string]: any}): APIGatewayProxyResult => ({
+const createResponse = (statusCode: number, body: { [key: string]: any }): APIGatewayProxyResult => ({
   statusCode,
   headers: {
     'Content-Type': 'application/json',
@@ -149,9 +150,24 @@ export const confirmSignUp = async (event: APIGatewayProxyEvent): Promise<APIGat
     await cognitoClient.send(command);
 
     console.log('Email confirmation successful');
+    const emailService = new EmailService();
+
+    let emailSuccess = false;
+    try {
+
+      const welcomeEmail = emailService.generateWelcomeEmail(email);
+      const emailSent = await emailService.sendEmail(welcomeEmail);
+      if (emailSent) {
+        emailSuccess = true;
+      }
+
+    } catch (error) {
+      console.error('Error sending confirmation email:', error);
+    }
 
     return createResponse(200, {
       message: 'Email confirmed successfully. You can now sign in.',
+      emailSuccess,
     });
 
   } catch (error: any) {

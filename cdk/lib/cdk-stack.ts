@@ -289,6 +289,18 @@ export class CdkStack extends cdk.Stack {
     );
 
 
+    // --- SES Policy ---
+    const sesPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'ses:SendEmail',
+        'ses:SendRawEmail',
+      ],
+      resources: ['*'], // In production, limit to specific domain
+    });
+    
+    confirmSignUpFunction.addToRolePolicy(sesPolicy);
+
 
     // Outputs
     new cdk.CfnOutput(this, 'UserPoolId', {
