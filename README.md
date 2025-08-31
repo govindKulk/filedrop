@@ -402,7 +402,7 @@ This project is licensed under the MIT License - see the [LICENSE](https://www.n
 
 **Govind Kulkarni**
 
-- **GitHub**: [@govindkulkarni](https://github.com/govindKulk)
+- **GitHub**: [@govindKulk](https://github.com/govindKulk)
 - **Email**: [kulkarnigovind2003@gmail.com](mailto:kulkarnigovind2003@gmail.com)
 - **LinkedIn**: [linkedin.com/in/govind-kulkarni-44aa71228](https://www.linkedin.com/in/govind-kulkarni-44aa71228/)
 - **Portfolio**: [govindkulkarni.me](https://govindkulkarni.me)
