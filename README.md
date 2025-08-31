@@ -102,6 +102,11 @@ filedrop-aws-serverless/
 
 ```
 
+## API Docs
+[Swagger Documentation](https://app.swaggerhub.com/apis/govindkulkarni-43f/Filedrop/1.0.0)
+<img width="400" height="779" alt="image" src="https://github.com/user-attachments/assets/7a750e65-04ba-4a36-9a75-f87c18cb5d89" />
+
+
 ## 🛠️ Development Setup
 
 ### Prerequisites
