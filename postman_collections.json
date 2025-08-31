@@ -1,0 +1,273 @@
+{
+  "info": {
+    "name": "FileDrop API - Complete Test Suite",
+    "description": "Comprehensive API testing for FileDrop serverless application",
+    "schema": "<https://schema.getpostman.com/json/collection/v2.1.0/collection.json>"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "<https://your-api-id.execute-api.us-east-1.amazonaws.com/prod>",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "test@govindkulkarni.me",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Sign Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has userSub\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('userSub');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "2. Confirm Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"confirmationCode\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "confirm"]
+            }
+          }
+        },
+        {
+          "name": "3. Sign In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('accessToken');",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signin",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signin"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Operations",
+      "item": [
+        {
+          "name": "1. Get Upload URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has upload URL and file ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('uploadUrl');",
+                  "    pm.expect(jsonData).to.have.property('fileId');",
+                  "    pm.collectionVariables.set('fileId', jsonData.fileId);",
+                  "    pm.collectionVariables.set('uploadUrl', jsonData.uploadUrl);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"test-document.pdf\",\n  \"fileType\": \"application/pdf\",\n  \"fileSize\": 1024000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "upload"]
+            }
+          }
+        },
+        {
+          "name": "2. Complete Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileId\": \"{{fileId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "complete"]
+            }
+          }
+        },
+        {
+          "name": "3. List Files",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has files array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('files');",
+                  "    pm.expect(jsonData.files).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["files"]
+            }
+          }
+        },
+        {
+          "name": "4. Get Download URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "{{fileId}}", "download"]
+            }
+          }
+        },
+        {
+          "name": "5. Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "{{fileId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
