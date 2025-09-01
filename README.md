@@ -1,6 +1,6 @@
 # FileDrop - Serverless File Sharing Platform
 
-A production-ready serverless file sharing application built with AWS CDK, demonstrating modern cloud architecture patterns and best practices.
+A production-ready Ephemeral File sharing platform built using AWS Serverless Stack : Lambda, S3, DynamoDb, SES, Cognito, AWS CDK, SDK for Node.js
 
 [![AWS](<https://img.shields.io/badge/AWS-serverless-orange.svg>)](<https://aws.amazon.com/>)
 [![AWS](<https://img.shields.io/badge/AWS-Lambda-purple.svg>)](<https://aws.amazon.com/>)
@@ -104,7 +104,7 @@ filedrop-aws-serverless/
 
 ## API Docs
 [Swagger Documentation](https://app.swaggerhub.com/apis/govindkulkarni-43f/Filedrop/1.0.0)
-<img width="400" height="779" alt="image" src="https://github.com/user-attachments/assets/7a750e65-04ba-4a36-9a75-f87c18cb5d89" />
+<img align="center" width="400" height="779" alt="image" src="https://github.com/user-attachments/assets/7a750e65-04ba-4a36-9a75-f87c18cb5d89" />
 
 
 ## 🛠️ Development Setup
@@ -119,7 +119,7 @@ filedrop-aws-serverless/
 
 1. **Clone Repository**
    ```
-   git clone <https://github.com/govindKulk/filedrop.git>
+   git clone https://github.com/govindKulk/filedrop.git
    cd filedrop-aws-serverless ```
 
 1. **Install Global Dependencies**
@@ -133,7 +133,7 @@ filedrop-aws-serverless/
     
     ```
     aws configure
-    # Enter: Access Key ID, Secret Access Key, Region (us-east-1), Output format (json)
+    # Enter: Access Key ID, Secret Access Key, Region (us-east-1).
     
     ```
     
